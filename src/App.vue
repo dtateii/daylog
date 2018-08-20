@@ -8,6 +8,15 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: 'app',
+  created () {
+    console.log(this.$store.state.db)
+  }
+}
+</script>
+
 <style lang="scss">
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
