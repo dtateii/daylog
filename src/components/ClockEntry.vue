@@ -2,7 +2,8 @@
   <span id="nowEntry">
     <span>{{timeHuman}}</span>
     <input @keyup.enter="submit"
-        name="nowTextInput"
+         v-model="activityNow"
+         placeholder="Activity..."
     />
   </span>
 </template>
@@ -13,7 +14,8 @@ export default {
   data () {
     return {
       timeHuman: '',
-      minuteUTC: 0
+      minuteUTC: 0,
+      activityNow: ''
     }
   },
   created () {
@@ -30,10 +32,7 @@ export default {
       this.timeHuman = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
     },
     submit () {
-      var record = {
-        minuteUTC: this.minuteUTC,
-        text: 'test'
-      }
+      var record = {[this.minuteUTC]: this.activityNow}
       this.$store.commit('insert', record)
     }
   }

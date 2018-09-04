@@ -21,27 +21,29 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    db: firebase.firestore()
+    records: []
   },
   mutations: {
     insert: (state, record) => {
       const userId = 'bC2pZotbyhIBiPFmJ0DJ'
       const logId = '2018.08'
-      state.db.collection('users').doc(userId).collection('daylog').doc(logId)
-        .set(record).then(function () {
-          console.log('Document successfully written!')
+      firebase.firestore().collection('users').doc(userId).collection('daylog').doc(logId)
+        .update(record).then(function () {
+          console.log('Document successfully written')
         })
+    },
+    init: (state, records) => {
+      state.records = records
     }
   },
   actions: {
-    getLog: (state, logId) => {
-      const userId = 'bC2pZotbyhIBiPFmJ0DJ'
-      logId = '2018.08'
-      let docRef = state.db.collection('users').doc(userId).collection('daylog').doc(logId)
+    loadRecords: (context) => {
+      let userId = 'bC2pZotbyhIBiPFmJ0DJ'
+      let logId = '2018.08'
+      let docRef = firebase.firestore().collection('users').doc(userId).collection('daylog').doc(logId)
       docRef.get().then(function (doc) {
         if (doc.exists) {
-          console.log(doc.data())
-          return doc.data()
+          context.commit('init', doc.data())
         } else {
           console.log('No document')
         }
@@ -51,9 +53,8 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    records: actions => {
-      return function () {
-      }
+    getRecords: (state) => {
+      return state.records
     }
   }
 })

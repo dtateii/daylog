@@ -12,7 +12,7 @@
 export default {
   name: 'app',
   created () {
-    console.log(this.$store.state.db)
+    console.log('App.vue created.')
   }
 }
 </script>

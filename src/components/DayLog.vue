@@ -2,10 +2,10 @@
   <div class="daylog">
     <h2>{{title}}</h2>
     <div class="row"
-      v-for="record in records"
+      v-for="(record, key) in records"
       v-bind:key="record.id">
-      <span class="time">{{record}}</span>
-      <input class="description" />
+      <span class="time">{{key}}</span>
+      <input class="description" :value="record"/>
     </div>
     <button @click.prevent="newRow">+</button>
     <div class="row">
@@ -26,19 +26,19 @@ export default {
     ClockEntry
   },
   data () {
-    return {
-      records: []
-    }
+    return {}
   },
   created () {
-    return {
-      records: this.$store.getters.records
+    this.$store.dispatch('loadRecords')
+  },
+  computed: {
+    records: function () {
+      return this.$store.getters.getRecords
     }
   },
   methods: {
     newRow () {
-      // this.records.push({id: 670, timeHuman: '9:45 am'})
-      console.log(this.$store)
+      console.log('todo')
     }
   }
 }
