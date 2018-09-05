@@ -32,23 +32,29 @@ export default new Vuex.Store({
           console.log('Document successfully written')
         })
     },
+    update: (state, log) => {
+      // Instead of changing state directly, only change Firestore value,
+      // as local state is listening (loadRecords) and will update anyway.
+      let userId = 'bC2pZotbyhIBiPFmJ0DJ'
+      let logId = '2018.08'
+      let docRef = firebase.firestore().collection('users').doc(userId).collection('daylog').doc(logId)
+      docRef.update({[log.key]: log.value})
+    },
     init: (state, records) => {
       state.records = records
     }
   },
   actions: {
+    updateEntry: (context, log) => {
+      context.commit('update', log)
+    },
     loadRecords: (context) => {
       let userId = 'bC2pZotbyhIBiPFmJ0DJ'
       let logId = '2018.08'
       let docRef = firebase.firestore().collection('users').doc(userId).collection('daylog').doc(logId)
-      docRef.get().then(function (doc) {
-        if (doc.exists) {
-          context.commit('init', doc.data())
-        } else {
-          console.log('No document')
-        }
-      }).catch(function (error) {
-        console.log('Error getting doc:', error)
+      docRef.onSnapshot(function (doc) {
+        // @todo: Possibly undesirable overwrite if records changing from multiple sources at once?
+        context.commit('init', doc.data())
       })
     }
   },
