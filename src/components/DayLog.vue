@@ -31,21 +31,18 @@ export default {
   components: {
     ClockEntry
   },
-  data () {
-    return {}
-  },
   created () {
-    this.$store.dispatch('loadRecords')
+    this.$store.dispatch('daylog/loadRecords')
   },
   computed: {
     records: function () {
-      return this.$store.getters.getRecords
+      return this.$store.getters['daylog/getRecords']
     }
   },
   methods: {
     updateEntry (key, value) {
       let log = { 'key': key, 'value': value }
-      this.$store.dispatch('updateEntry', log)
+      this.$store.dispatch('daylog/updateEntry', log)
     },
     insertLog () {
       // Insert a new entry field and focus to it.
@@ -57,7 +54,3 @@ export default {
   }
 }
 </script>
-
-<style>
-
-</style>

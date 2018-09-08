@@ -33,7 +33,7 @@ export default {
     },
     submit () {
       var record = {[this.minuteUTC]: this.activityNow}
-      this.$store.commit('insert', record)
+      this.$store.dispatch('daylog/insertEntry', record)
     }
   }
 }

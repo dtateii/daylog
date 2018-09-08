@@ -12,6 +12,11 @@ export default new Router({
       component: Home
     },
     {
+      path: '/auth',
+      name: 'auth',
+      component: () => import('./views/Auth.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting
