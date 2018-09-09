@@ -12,8 +12,10 @@
         @keyup.enter="insertLog"
         @change="updateEntry(key, $event.target.value)"
         />
+        <!-- <button
+      class="insertion"
+      @click.prevent="newRow">+</button> -->
     </div>
-    <button @click.prevent="newRow">+</button>
     <div class="row">
       <ClockEntry />
     </div>
@@ -54,3 +56,23 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.time {
+    width: 128px;
+    text-align: right;
+    display: inline-block;
+    margin-right: 1em;
+}
+.time.now {
+  color: #f67;
+}
+.insertion {
+  width: 100%;
+  height: 2px;
+  padding: 0;
+  opacity: 0;
+  &:hover {
+    opacity: 1;
+  }
+}
+</style>

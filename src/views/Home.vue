@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <DayLog title="Quick Log" />
+    <DayLog title="Day Log" />
   </div>
 </template>
 

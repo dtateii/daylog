@@ -1,6 +1,6 @@
 <template>
   <span id="nowEntry">
-    <span>{{timeHuman}}</span>
+    <span class="time now">{{timeHuman}}</span>
     <input @keyup.enter="submit"
          v-model="activityNow"
          placeholder="Activity..."

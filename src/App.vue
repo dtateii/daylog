@@ -18,12 +18,15 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
+html, body {
+  background-color:#2e353f;
+  color: #c6b5a3;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+#app {
   text-align: center;
-  color: #2c3e50;
 }
 #nav {
   padding: 30px;
@@ -33,6 +36,15 @@ export default {
     &.router-link-exact-active {
       color: #42b983;
     }
+  }
+}
+input, textarea, select, button {
+  background: none;
+  color: #fff;
+  border: none;
+  padding: 0.4em 1em;
+  &:hover {
+    background: rgba(200,230,255,0.05)
   }
 }
 </style>
