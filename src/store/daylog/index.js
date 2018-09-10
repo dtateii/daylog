@@ -12,24 +12,31 @@ export default {
     }
   },
   actions: {
-    updateEntry: (context, log) => {
+    updateEntry: (context, entry) => {
       // Instead of changing state directly, only change Firestore value,
       // as local state is listening (loadRecords) and will update anyway.
-      let docRef = context.rootState.db.collection('users').doc(userId).collection('daylog').doc(logId)
-      docRef.update({[log.key]: log.value})
+      context.rootState.db.collection('users').doc(userId).collection('daylog').doc(logId).collection('entries').doc(entry.id)
+        .update({activity: entry.activity})
     },
     insertEntry: (context, record) => {
-      context.rootState.db.collection('users').doc(userId).collection('daylog').doc(logId)
-        .update(record).then(function () {
+      context.rootState.db.collection('users').doc(userId).collection('daylog').doc(logId).collection('entries')
+        .add(record).then(function () {
           console.log('doc write')
         })
     },
     loadRecords: (context) => {
-      let docRef = context.rootState.db.collection('users').doc(userId).collection('daylog').doc(logId)
-      docRef.onSnapshot(function (doc) {
-        // @todo: Possibly undesirable overwrite if records changing from multiple sources at once?
-        context.commit('init', doc.data())
-      })
+      context.rootState.db.collection('users').doc(userId).collection('daylog').doc(logId).collection('entries').orderBy('time')
+        .onSnapshot(function (querySnapshot) {
+          let records = []
+          querySnapshot.forEach(function (doc) {
+            let data = doc.data()
+            // Need the id to come along so it can be used later to update this record.
+            data.id = doc.id
+            records.push(data)
+          })
+          records.sort()
+          context.commit('init', records)
+        })
     }
   },
   getters: {

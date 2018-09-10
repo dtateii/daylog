@@ -13,8 +13,8 @@ export default {
   name: 'ClockEntry',
   data () {
     return {
+      time: '',
       timeHuman: '',
-      minuteUTC: 0,
       activityNow: ''
     }
   },
@@ -27,12 +27,11 @@ export default {
   },
   methods: {
     updateTime () {
-      var time = new Date()
-      this.minuteUTC = time.getUTCMinutes() + (time.getUTCHours() * 60)
-      this.timeHuman = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
+      this.time = new Date()
+      this.timeHuman = this.time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
     },
     submit () {
-      var record = {[this.minuteUTC]: this.activityNow}
+      var record = {time: this.time, activity: this.activityNow}
       this.$store.dispatch('daylog/insertEntry', record)
     }
   }

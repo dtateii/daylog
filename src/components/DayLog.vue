@@ -3,14 +3,14 @@
     <h2>{{title}}</h2>
     <div
       class="row"
-      v-for="(record, key) in records"
+      v-for="record in records"
       v-bind:key="record.id">
-      <span class="time">{{key}}</span>
+      <span class="time">{{record.time | timeHuman}}</span>
       <input
         class="description"
-        :value="record"
+        :value="record.activity"
         @keyup.enter="insertLog"
-        @change="updateEntry(key, $event.target.value)"
+        @change="updateEntry(record.id, $event.target.value)"
         />
         <!-- <button
       class="insertion"
@@ -42,9 +42,8 @@ export default {
     }
   },
   methods: {
-    updateEntry (key, value) {
-      let log = { 'key': key, 'value': value }
-      this.$store.dispatch('daylog/updateEntry', log)
+    updateEntry (entryId, entryText) {
+      this.$store.dispatch('daylog/updateEntry', {id: entryId, activity: entryText})
     },
     insertLog () {
       // Insert a new entry field and focus to it.
@@ -52,6 +51,13 @@ export default {
     },
     newRow () {
       console.log('todo: insert new record at pointer location...')
+    }
+  },
+  filters: {
+    timeHuman: function (timestamp) {
+      let date = timestamp.toDate()
+      let timeDisplay = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
+      return timeDisplay
     }
   }
 }
@@ -64,7 +70,7 @@ export default {
     margin-right: 1em;
 }
 .time.now {
-  color: #f67;
+  color: #ff6070;
 }
 .insertion {
   width: 100%;
