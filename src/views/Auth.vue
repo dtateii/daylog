@@ -9,7 +9,7 @@
 export default {
   name: 'auth',
   created () {
-    this.$store.dispatch('user/authenticate')
+    this.$store.dispatch('auth/signin')
   }
 }
 </script>

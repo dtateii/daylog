@@ -34,7 +34,9 @@ export default {
     ClockEntry
   },
   created () {
-    this.$store.dispatch('daylog/loadRecords')
+    this.$store.dispatch('auth/authenticate').then(response => {
+      this.$store.dispatch('daylog/loadRecords')
+    })
   },
   computed: {
     records: function () {

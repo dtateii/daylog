@@ -17,7 +17,7 @@ export default {
   name: 'account',
   computed: {
     user: function () {
-      return this.$store.getters['user/getUser']
+      return this.$store.getters['auth/getUser']
     },
     photoBg: function () {
       return 'background-image: url(' + this.user.photoURL + ');'
@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     signout () {
-      this.$store.dispatch('user/signout')
+      this.$store.dispatch('auth/signout')
     },
     signin () {
       console.log('sign-in clicked...')
