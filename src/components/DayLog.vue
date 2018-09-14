@@ -3,14 +3,14 @@
     <h2>{{title}}</h2>
     <div
       class="row"
-      v-for="record in records"
-      v-bind:key="record.id">
-      <span class="time">{{record.time | timeHuman}}</span>
+      v-for="logEntry in logEntries"
+      v-bind:key="logEntry.id">
+      <span class="time">{{logEntry.timestamp | timeHuman}}</span>
       <input
         class="description"
-        :value="record.activity"
+        :value="logEntry.activity"
         @keyup.enter="insertLog"
-        @change="updateEntry(record.id, $event.target.value)"
+        @change="updateEntry(logEntry.id, $event.target.value)"
         />
         <!-- <button
       class="insertion"
@@ -35,30 +35,30 @@ export default {
   },
   created () {
     this.$store.dispatch('auth/authenticate').then(response => {
-      this.$store.dispatch('daylog/loadRecords')
+      this.$store.dispatch('daylog/loadLogEntries')
     })
   },
   computed: {
-    records: function () {
-      return this.$store.getters['daylog/getRecords']
+    logEntries: function () {
+      return this.$store.getters['daylog/getLogEntries']
     }
   },
   methods: {
     updateEntry (entryId, entryText) {
-      this.$store.dispatch('daylog/updateEntry', {id: entryId, activity: entryText})
+      this.$store.dispatch('daylog/updateLogEntry', {id: entryId, activity: entryText})
     },
     insertLog () {
       // Insert a new entry field and focus to it.
-      console.log('todo: insert new record below current...')
+      console.log('todo: insert new logEntry below current...')
     },
     newRow () {
-      console.log('todo: insert new record at pointer location...')
+      console.log('todo: insert new logEntry at pointer location...')
     }
   },
   filters: {
     timeHuman: function (timestamp) {
       let date = timestamp.toDate()
-      let timeDisplay = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
+      let timeDisplay = date.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
       return timeDisplay
     }
   }

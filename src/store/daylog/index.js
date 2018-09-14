@@ -1,58 +1,57 @@
-const logId = '2018.08'
-
 export default {
   namespaced: true,
   state: {
-    records: []
+    logEntries: []
   },
   mutations: {
-    init: (state, records) => {
-      state.records = records
+    init: (state, logEntries) => {
+      state.logEntries = logEntries
     }
   },
   actions: {
-    updateEntry: (context, entry) => {
+    updateLogEntry: (context, logEntry) => {
       // Instead of changing state directly, only change Firestore value,
-      // as local state is listening (loadRecords) and will update anyway.
+      // as local state is listening (loadlogEntries) and will update anyway.
       let user = context.rootState.auth.user
       if (!user.uid) {
         return
       }
-      context.rootState.db.doc(`users/${user.uid}/daylog/${logId}/entries/${entry.id}`)
-        .update({activity: entry.activity})
+      context.rootState.db.doc(`users/${user.uid}/daylog/${logEntry.id}`)
+        .update({activity: logEntry.activity})
     },
-    insertEntry: (context, record) => {
+    insertLogEntry: (context, logEntry) => {
       let user = context.rootState.auth.user
       if (!user.uid) {
         return
       }
-      context.rootState.db.collection('users').doc(user.uid).collection('daylog').doc(logId).collection('entries')
-        .add(record).then(function () {
-          console.log('doc write')
+      // Firebase automatically converts JS Date obj to Firbase Timestamp obj. Thanks!
+      context.rootState.db.collection('users').doc(user.uid).collection('daylog')
+        .add(logEntry).then(function () {
+          console.log('Entry `' + logEntry.activity + '` successfully stored.')
         })
     },
-    loadRecords: (context) => {
+    loadLogEntries: (context) => {
       let user = context.rootState.auth.user
       if (!user.uid) {
         return
       }
-      context.rootState.db.collection(`users/${user.uid}/daylog/${logId}/entries`).orderBy('time')
+      context.rootState.db.collection(`users/${user.uid}/daylog`).orderBy('timestamp')
         .onSnapshot(function (querySnapshot) {
-          let records = []
+          let logEntries = []
           querySnapshot.forEach(function (doc) {
             let data = doc.data()
-            // Need the id to come along so it can be used later to update this record.
+            // Need the id to come along so it can be used later to update this logEntry.
             data.id = doc.id
-            records.push(data)
+            logEntries.push(data)
           })
-          records.sort()
-          context.commit('init', records)
+          logEntries.sort()
+          context.commit('init', logEntries)
         })
     }
   },
   getters: {
-    getRecords: (state) => {
-      return state.records
+    getLogEntries: (state) => {
+      return state.logEntries
     }
   }
 }
