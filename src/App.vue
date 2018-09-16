@@ -24,6 +24,7 @@ html, body {
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 12pt;
 }
 #app {
   text-align: center;
@@ -42,11 +43,12 @@ html, body {
 }
 input, textarea, select, button {
   background: none;
-  color: #fff;
+  color: inherit;
   border: none;
   padding: 0.4em 1em;
   &:hover {
     background: rgba(200,230,255,0.05)
   }
+  font-size: 1em;
 }
 </style>

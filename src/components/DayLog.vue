@@ -5,8 +5,10 @@
       class="day"
       v-for="(logDay, key) in logDays"
       v-bind:key="key">
-      <h2>{{key + 1}}</h2>
-      <h3>{{logDay.name}}</h3>
+      <header>
+        <h3 class="dayNum">{{key + 1}}</h3>
+        <span class="dayName">{{logDay.name}}</span>
+      </header>
       <div
       class="row"
       v-for="logEntry in logDay.entries"
@@ -105,18 +107,40 @@ export default {
   filters: {
     timeHuman: function (timestamp) {
       let date = timestamp.toDate()
-      let timeDisplay = date.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
+      let timeDisplay = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+      // Remove am/pm: todo: Note this will probably screw up other locales...
+      timeDisplay = timeDisplay.slice(0, -3)
+
       return timeDisplay
     }
   }
 }
 </script>
 <style lang="scss">
+.daylog {
+  text-align: left;
+  margin: auto;
+  min-width: 320px;
+  max-width: 470px;
+  padding-bottom: 10em;
+}
+.day {
+  & header {
+    color: white;
+  }
+}
+.dayNum {
+  display: inline-block;
+  margin-right: 0.4em;
+  font-size: 2em;
+}
+.dayName {
+  text-transform: uppercase;
+}
 .time {
-    width: 128px;
     text-align: right;
     display: inline-block;
-    margin-right: 1em;
+    margin-right: 0.1em;
 }
 .time.now {
   color: #ff6070;

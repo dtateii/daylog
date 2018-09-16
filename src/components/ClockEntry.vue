@@ -28,7 +28,7 @@ export default {
   methods: {
     updateTime () {
       this.date = new Date()
-      this.timeHuman = this.date.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
+      this.timeHuman = this.date.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true})
     },
     submit () {
       // Pass Date to Firestore. It will convert JS Date to Firebase Timestamp.
