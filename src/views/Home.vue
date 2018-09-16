@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Account />
-    <DayLog title="Day Log" />
+    <DayLog logId="2018.09" />
   </div>
 </template>
 
