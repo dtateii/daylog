@@ -43,4 +43,7 @@ export default {
 #nowEntry {
     display: inline;
 }
+.time.now {
+  color: #ff6070;
+}
 </style>
