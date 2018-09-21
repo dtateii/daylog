@@ -53,7 +53,7 @@
 <script>
 import ClockEntry from '@/components/ClockEntry.vue'
 import OffDays from '@/components/OffDays.vue'
-import TimeHelper from '@/globals/timeHelper'
+import TimeHelper from '@/common/timeHelper'
 
 export default {
   name: 'DayLog',
@@ -204,6 +204,7 @@ export default {
     font-size: 0.7em;
     font-weight: bold;
     text-transform: uppercase;
+    color: $color-algae-green;
   }
   .dayDetails {
     display: flex;
@@ -216,12 +217,18 @@ export default {
     }
     .dayName {
       text-transform: uppercase;
-      font-weight: 100;
+      font-weight: 300;
+      opacity: 0.8;
     }
   }
-  &.today .dayDetails .dayNum,
-  &.today .dayDetails .dayName {
-    color: #ff6070;
+  &.today {
+    .monthLabel {
+      color: #ccc;
+    }
+    .dayNum,
+    .dayName {
+      color: $color-now;
+    }
   }
   .entries {
     margin-bottom: 2em;

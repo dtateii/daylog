@@ -39,11 +39,11 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 #nowEntry {
     display: inline;
 }
 .time.now {
-  color: #ff6070;
+  color: $color-now;
 }
 </style>

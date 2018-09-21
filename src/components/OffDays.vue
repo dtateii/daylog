@@ -30,20 +30,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@mixin border-radii($topleft, $topright, $bottomright, $bottomleft) {
-  border-top-left-radius: $topleft;
-  border-top-right-radius: $topright;
-  border-bottom-right-radius: $bottomright;
-  border-bottom-left-radius: $bottomleft;
-  -webkit-border-top-left-radius: $topleft;
-  -webkit-border-top-right-radius: $topright;
-  -webkit-border-bottom-right-radius: $bottomright;
-  -webkit-border-bottom-left-radius: $bottomleft;
-  -moz-border-radius-topleft: $topleft;
-  -moz-border-radius-topright: $topright;
-  -moz-border-radius-bottomright: $bottomright;
-  -moz-border-radius-bottomleft: $bottomleft;
-}
 .offdays {
   display: flex;
   margin: 2em 2em 3em;
@@ -56,9 +42,9 @@ export default {
   padding: 0.5em;
   flex: 1 1;
   text-align: center;
-  border: 1px solid #fff;
+  border: 1px solid rgba(200,200,200,0.5);
   border-left: 0;
-  background: rgba(124,124,124,0.6);
+  background: rgba(124,124,124,0.4);
   color: #fff;
   &:first-child {
     border-left: 1px solid #ccc;
@@ -68,7 +54,7 @@ export default {
     @include border-radii(0, 2em, 2em, 0)
   }
   &:hover {
-    opacity: 0.8;
+    opacity: 0.9;
   }
 }
 </style>

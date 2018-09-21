@@ -16,8 +16,8 @@ export default {
 
 <style lang="scss">
 html, body {
-  background-color:#2e353f;
-  color: #c6b5a3;
+  background-color: $color-outer-space;
+  color: $color-dawn;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -38,14 +38,15 @@ html, body {
     }
   }
 }
-input, textarea, select, button {
+input, textarea {
+  font-size: 1em;
+  font-family: monospace;
   background: none;
   color: inherit;
   border: none;
   padding: 0.4em 1em;
   &:hover {
-    background: rgba(200,230,255,0.05)
+    background: $color-lighten;
   }
-  font-size: 1em;
 }
 </style>
