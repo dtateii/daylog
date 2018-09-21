@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   // todo: can this be offered as an extension of Date.toLocaleString?
   getWeekdayName: (weekdayNum) => {
     let name = ''

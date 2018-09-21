@@ -12,7 +12,7 @@
         class="workday">
         <header>
           <div class="divider">
-            <span class="monthLabel">{{monthName}}</span>
+            <span class="monthLabel">{{month.name}}</span>
           </div>
           <div class="dayDetails">
             <h3 class="dayNum">{{key + 1}}</h3>
@@ -70,50 +70,105 @@ export default {
     })
   },
   computed: {
-    monthName: function () {
+    logSet: function () {
       // logId has format YYYY.MM
-      let date = new Date(this.logId)
-      return date.toLocaleString('en-US', {month: 'long'})
+      return new Date(this.logId)
+    },
+    now: function () {
+      let date = new Date()
+      return {
+        month: {
+          name: date.toLocaleString('en-US', {month: 'long'}),
+          num: parseInt(date.toLocaleString('en-US', {month: 'numeric'}))
+        },
+        day: {
+          name: TimeHelper.getWeekdayName(date.getDay()),
+          num: parseInt(date.toLocaleString('en-US', {day: 'numeric'}))
+        }
+      }
+    },
+    month: function () {
+      return {
+        name: this.logSet.toLocaleString('en-US', {month: 'long'}),
+        num: parseInt(this.logSet.toLocaleString('en-US', {month: 'numeric'}))
+      }
+    },
+    year: function () {
+      return this.logSet.toLocaleString('en-US', {year: 'numeric'})
     },
     logDays: function () {
-      // Create a frame for the month's days to-date.
+      // This function will ultimately return this array of day objects.
       let days = []
+
+      // Get from the store all the log entries for this month.
+      let monthEntries = this.$store.getters['daylog/getLogEntries']
+
+      // Group the entries into days.
+      let entries = {}
+      monthEntries.forEach(function (entry) {
+        // Pull the day number from the entry timestamp.
+        let date = new Date(0) // Zero sets the date to the epoch
+        date.setUTCSeconds(entry.timestamp.seconds)
+        let entryDayNum = date.toLocaleString('en-US', {day: 'numeric'})
+        entries[entryDayNum] = entries[entryDayNum] || []
+        entries[entryDayNum].push(entry)
+      })
+
+      // Construct the calendar of days for this month log set.
+      // Calculate the number of days in the logset month:
+      // https://www.bennadel.com/blog/3311-using-the-joyous-power-of-relative-dates-to-calculate-days-in-month-in-javascript.htm
+      let daysInMonth = new Date(this.year, (this.month.num), 0).getDate()
+      let lastDay = daysInMonth
+      // If the month in set is the current calendar month, then extend
+      // only to the current day.
+      if (this.isCurrentMonth()) {
+        // Today's day number is the limit to which the set should extend.
+        lastDay = this.now.day.num
+      }
+
       // Series of non-workdays (usually weekends) are "offdays" and
       // group together for minimized, unified presentation.
       let offdaySeries = []
-      let firstDateOfMonth = new Date(this.logId)
-      let dayNumToday = new Date().toLocaleString('en-US', {day: 'numeric'})
-      // todo: This should conditionally limit either: num days in month, or,
-      // if month-in-view is current month, limit to  num days so far in month.
-      // In development, hard-coding limit to current day in current month.
-      let dayLimit = dayNumToday // todo
-      let currentMonth = true // todo
-      // Start day numeration from first day in this month.
-      let weekdayNum = firstDateOfMonth.getDay()
-      for (let i = 0; i < dayLimit; i++) {
-        // Pass log entries and set other props.
-        // isToday says if this day in iteration is the actual day today.
+      // Begin weekday enumeration from first day in the set month.
+      let weekdayNum = this.logSet.getDay()
+
+      // Loop: Build out each day's properties
+      for (let i = 0; i < lastDay; i++) {
         // All days are considered either "workdays" or "offdays".
-        // isWorkday defaults to true on M-F and false on Sa-Su.
+        // Default "workdays" are M-F, "offdays" are Sa-Su, derived
+        // from the weekday number, except if the day has entries
+        // attached, then it's always a workday no matter what.
+        // Assume no entries by default.
+        let hasEntries = false
+        if (i + 1 in entries) {
+          hasEntries = true
+        }
+
         days[i] = {
           name: TimeHelper.getWeekdayName(weekdayNum),
-          entries: [],
-          isToday: currentMonth && i === (dayNumToday - 1),
-          isWorkday: weekdayNum > 0 && weekdayNum < 6
+          isToday: this.isCurrentMonth() && i === (this.now.day.num - 1),
+          isWorkday: (weekdayNum > 0 && weekdayNum < 6) || hasEntries
         }
+        // Add entries if they exist
+        if (hasEntries) {
+          days[i].entries = entries[i + 1]
+        }
+
+        // Handle offday series (aka weekends) grouping.
+        // Initially assume every non-workday will be the last one in a series.
+        days[i].isLastOffday = true
+
         // Consecutive non-workdays are grouped together for different display.
         if (days[i].isWorkday) {
           // Any occurrence of a workday should reset the current series of offdays.
           offdaySeries = []
         } else {
-          // Add this day to the current unbroken series of Offdays.
+          // Add this offday to the current unbroken series of offdays.
           // The series only needs the names of the days in it.
           offdaySeries.push({
             name: days[i].name,
             dayNum: i + 1
           })
-          // Assume each non-workday will be the last non-workday in a series.
-          days[i].isLastOffday = true
           // Each consecutive non-workday should unmake the previous assumption
           // such that a string of non-work days flags only the last one as 'last'.
           let previous = i - 1
@@ -127,29 +182,10 @@ export default {
           // Attach the current series to this offday.
           days[i].offdaySeries = offdaySeries
         }
-        // iterate weekday number.
-        if (weekdayNum === 6) {
-          weekdayNum = 0
-        } else {
-          weekdayNum++
-        }
+
+        // Increment the weekday number.
+        weekdayNum === 6 ? weekdayNum = 0 : weekdayNum++
       }
-      // Get all log entries for month from store.
-      let monthEntries = this.$store.getters['daylog/getLogEntries']
-      // Group month's entries into days.
-      monthEntries.forEach(function (entry) {
-        // Zero sets the date to the epoch
-        let date = new Date(0)
-        date.setUTCSeconds(entry.timestamp.seconds)
-        let day = date.toLocaleString('en-US', {day: 'numeric'})
-        // todo: error handling -- can an entry exist beyond the days in the frame?
-        days[day - 1].entries.push(entry)
-        // Change weekend days back to "WorkDays" if there are entries logged.
-        // todo: This messes up the "isLastOffday" approached used to manage a series...
-        // if (!days[day - 1].isWorkday) {
-        //   days[day - 1].isWorkday = true
-        // }
-      })
       return days
     }
   },
@@ -163,6 +199,9 @@ export default {
     },
     newRow () {
       console.log('todo: insert new logEntry at pointer location...')
+    },
+    isCurrentMonth () {
+      return this.month.num === this.now.month.num
     }
   },
   filters: {
