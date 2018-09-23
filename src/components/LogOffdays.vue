@@ -13,7 +13,7 @@
 
 <script>
 export default {
-  name: 'OffDays',
+  name: 'LogOffdays',
   props: {
     days: Array
   },

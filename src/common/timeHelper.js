@@ -26,5 +26,23 @@ export default {
         break
     }
     return name
+  },
+  getNow: function () {
+    let date = new Date()
+    return {
+      year: parseInt(date.toLocaleString('en-US', {year: 'numeric'})),
+      month: {
+        name: date.toLocaleString('en-US', {month: 'long'}),
+        num: parseInt(date.toLocaleString('en-US', {month: 'numeric'}))
+      },
+      day: {
+        name: this.getWeekdayName(date.getDay()),
+        num: parseInt(date.toLocaleString('en-US', {day: 'numeric'}))
+      }
+    }
+  },
+  daysInMonth: (year, monthNum) => {
+    // https://www.bennadel.com/blog/3311-using-the-joyous-power-of-relative-dates-to-calculate-days-in-month-in-javascript.htm
+    return new Date(year, (monthNum), 0).getDate()
   }
 }

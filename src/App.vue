@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
+      <router-link to="/">Home</router-link>
+      <router-link to="/log">Log</router-link>
       <router-link to="/auth">Auth</router-link>
     </div>
     <router-view/>
@@ -33,6 +34,7 @@ html, body {
   a {
     font-weight: bold;
     color: #94b3d1;
+    margin: 0 0.3em;
     &.router-link-exact-active {
       color: #42b983;
     }

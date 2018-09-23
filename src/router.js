@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import HomeScreen from './views/HomeScreen.vue'
+import LogScreen from './views/LogScreen.vue'
+import Auth from './views/Auth.vue'
 
 Vue.use(Router)
 
@@ -8,21 +10,18 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      name: 'homeScreen',
+      component: HomeScreen
     },
     {
       path: '/auth',
       name: 'auth',
-      component: () => import('./views/Auth.vue')
+      component: Auth
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      path: '/log/:year?/:month?',
+      name: 'logScreen',
+      component: LogScreen
     }
   ]
 })

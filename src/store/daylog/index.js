@@ -1,14 +1,52 @@
+import TimeHelper from '@/common/timeHelper'
+
 export default {
   namespaced: true,
   state: {
-    logEntries: []
+    logDays: [],
+    month: null,
+    year: null
   },
   mutations: {
-    init: (state, logEntries) => {
-      state.logEntries = logEntries
+    setEntries: (state, logEntries) => {
+      logEntries.forEach(function (entry) {
+        // Pull the day number from the entry timestamp.
+        let date = new Date(0) // Zero sets the date to the epoch
+        date.setUTCSeconds(entry.timestamp.seconds)
+        let entryDayNum = date.toLocaleString('en-US', {day: 'numeric'})
+        let index = entryDayNum - 1
+        state.logDays[index].entries = state.logDays[index].entries || []
+        state.logDays[index].entries.push(entry)
+        // Any day with entries is treated as a 'workday'.
+        if (!state.logDays[index].isWorkday) {
+          state.logDays[index].isWorkday = true
+          // Seek to end of the offday series, and remove from it
+          // the offday that was just converted to a workday.
+          let seeking = true
+          let offset = 1
+          do {
+            if ('offdaySeries' in state.logDays[index + offset]) {
+              // todo: This only works on the first item...
+              state.logDays[index + offset].offdaySeries.shift()
+              seeking = false
+            }
+            offset++
+          } while (seeking)
+        }
+      })
+    },
+    setDays: (state, days) => {
+      state.logDays = days
+    },
+    selectLog: (state, set) => {
+      state.year = set.year
+      state.month = set.month
     }
   },
   actions: {
+    selectLog: (context, set) => {
+      context.commit('selectLog', set)
+    },
     updateLogEntry: (context, logEntry) => {
       // Instead of changing state directly, only change Firestore value,
       // as local state is listening (loadlogEntries) and will update anyway.
@@ -31,6 +69,7 @@ export default {
         })
     },
     loadLogEntries: (context) => {
+      // todo: Filter query for desired entries set (month)
       let user = context.rootState.auth.user
       if (!user.uid) {
         return
@@ -45,13 +84,80 @@ export default {
             logEntries.push(data)
           })
           logEntries.sort()
-          context.commit('init', logEntries)
+          context.commit('setEntries', logEntries)
         })
+    },
+    loadLogDays: (context) => {
+      // Construct the calendar of days for this month log set.
+      let days = []
+      // Calculate the number of days in the logset month:
+      let daysInMonth = TimeHelper.daysInMonth(context.state.year, context.state.month)
+      let lastDay = daysInMonth
+      // If the month in set is the current calendar month, then extend
+      // the days list only to the current day.
+      if (context.state.month === TimeHelper.getNow().month.num) {
+        // Today's day number is the limit to which the set should extend.
+        lastDay = TimeHelper.getNow().day.num
+      }
+
+      // Series of non-workdays (usually weekends) are "offdays" and
+      // group together for minimized, unified presentation.
+      let offdaySeries = []
+      // Begin weekday enumeration from first day in the set month.
+      let weekdayNum = new Date(context.state.year + ':' + context.state.month).getDay()
+
+      // Loop: Build out each day's properties
+      for (let i = 0; i < lastDay; i++) {
+        // All days are considered either "workdays" or "offdays".
+        // Default "workdays" are M-F, "offdays" are Sa-Su, derived
+        // from the weekday number.
+        days[i] = {
+          name: TimeHelper.getWeekdayName(weekdayNum),
+          isToday: (context.state.month === TimeHelper.getNow().month.num) && i === (TimeHelper.getNow().day.num - 1),
+          isWorkday: (weekdayNum > 0 && weekdayNum < 6)
+        }
+
+        // Handle offday series (aka weekends) grouping.
+        // Initially assume every non-workday will be the last one in a series.
+        days[i].isLastOffday = true
+
+        // Consecutive non-workdays are grouped together for different display.
+        if (days[i].isWorkday) {
+          // Any occurrence of a workday should reset the current series of offdays.
+          offdaySeries = []
+        } else {
+          // Add this offday to the current unbroken series of offdays.
+          // The series only needs the names of the days in it.
+          offdaySeries.push({
+            name: days[i].name,
+            dayNum: i + 1
+          })
+          // Each consecutive non-workday should unmake the previous assumption
+          // such that a string of non-work days flags only the last one as 'last'.
+          let previous = i - 1
+          if (previous >= 0) {
+            if (!days[previous].isWorkday) {
+              days[previous].isLastOffday = false
+              // Likewise, remove the unnecessary series attachment.
+              delete days[previous].offdaySeries
+            }
+          }
+          // Attach the current series to this offday.
+          days[i].offdaySeries = offdaySeries
+        }
+
+        // Increment the weekday number.
+        weekdayNum === 6 ? weekdayNum = 0 : weekdayNum++
+      }
+      context.commit('setDays', days)
     }
   },
   getters: {
     getLogEntries: (state) => {
       return state.logEntries
+    },
+    getLogDays: (state) => {
+      return state.logDays
     }
   }
 }
