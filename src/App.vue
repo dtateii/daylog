@@ -18,11 +18,8 @@ export default {
 <style lang="scss">
 html, body {
   background-color: $color-outer-space;
-  color: $color-dawn;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 11pt;
+  color: white;
+  @extend %type-default
 }
 #app {
   text-align: center;
@@ -42,13 +39,9 @@ html, body {
 }
 input, textarea {
   font-size: 1em;
-  font-family: monospace;
   background: none;
   color: inherit;
   border: none;
   padding: 0.4em 1em;
-  &:hover {
-    background: $color-lighten;
-  }
 }
 </style>

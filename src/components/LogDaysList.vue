@@ -82,10 +82,12 @@ export default {
 }
 .day {
   & header {
-    color: white;
+    /* Line up the right edge of the header Day Number
+     * with the right edge of the entries' clock times */
+    padding-left: 0.5em;
+    margin-bottom: 0.6em;
   }
   .divider {
-    opacity: 0.5;
     display: flex;
   }
   .divider:after {
@@ -94,12 +96,14 @@ export default {
     margin-left: 0.5em;
     width: 100%;
     height: 0.5em;
+    opacity: 0.5;
   }
   .monthLabel {
     font-size: 0.7em;
     font-weight: bold;
     text-transform: uppercase;
     color: $color-algae-green;
+    opacity: 0.8;
   }
   .dayDetails {
     display: flex;
@@ -108,12 +112,12 @@ export default {
       display: inline-block;
       margin: 0 0.4em 0 0;
       font-size: 2em;
-      font-weight: 100;
+      font-weight: 300;
     }
     .dayName {
       text-transform: uppercase;
-      font-weight: 300;
       opacity: 0.8;
+      @include effect-transition (opacity);
     }
   }
   &.today {
@@ -123,6 +127,7 @@ export default {
     .dayNum,
     .dayName {
       color: $color-now;
+      opacity: 1;
     }
   }
 }

@@ -69,20 +69,35 @@ export default {
 <style lang="scss" scoped>
 .entries {
   margin-bottom: 2em;
+  font-weight: 300;
 }
 .row input {
+  opacity: 0.8;
+  @include effect-transition (all);
+  width: 80%;
   &:focus {
     outline: none;
+    opacity: 1;
+    color: $color-focus;
   }
   &:hover {
-    background: none;
+    opacity: 1;
   };
 }
 
 .time {
-    text-align: right;
-    display: inline-block;
-    margin-right: 0.1em;
+  text-align: right;
+  display: inline-block;
+  width: 8%;
+  opacity: 0.8;
+  @include effect-transition (opacity);
+  &:focus {
+    opacity: 1;
+    color: $color-focus;
+  }
+  &:hover {
+    opacity: 1;
+  }
 }
 .insertion {
   width: 100%;

@@ -48,10 +48,10 @@ export default {
   color: #fff;
   &:first-child {
     border-left: 1px solid #ccc;
-    @include border-radii-left(2em, 2em)
+    @include box-border-radii-left(2em, 2em)
   }
   &:last-child {
-    @include border-radii-right(2em, 2em)
+    @include box-border-radii-right(2em, 2em)
   }
 
   &:hover {
