@@ -20,15 +20,15 @@
         </header>
         <section class="entries">
           <div
-            v-for="logEntry in logDay.entries"
-            v-bind:key="logEntry.id"
+            v-for="entry in logDay.entries"
+            v-bind:key="entry.id"
             class="row">
-            <span class="time">{{logEntry.timestamp | timeHuman}}</span>
+            <span class="time">{{getEntry(entry.entryId).timestamp | timeHuman}}</span>
             <input
               class="description"
-              :value="logEntry.activity"
+              :value="getEntry(entry.entryId).activity"
               @keyup.enter="insertLog"
-              @change="updateEntry(logEntry.id, $event.target.value)"
+              @change="updateEntry(entry.entryId, $event.target.value)"
               />
               <!-- <button
             class="insertion"
@@ -70,27 +70,44 @@ export default {
       let date = new Date(this.$store.state.daylog.year + ':' + this.$store.state.daylog.month)
       return {
         name: date.toLocaleString('en-US', {month: 'long'}),
-        num: this.$store.state.daylog.month.num
+        num: this.$store.state.daylog.month
       }
+    },
+    logEntries: function () {
+      return this.$store.getters['daylog/getLogEntries']
     },
     logDays: function () {
       // Calendar the days of the month.
       let days = this.$store.getters['daylog/getLogDays']
-      // Get from the store all the log entries for this month.
-      // let monthEntries = this.$store.getters['daylog/getLogEntries']
-      // // Bind the entries to days.
-      // monthEntries.forEach(function (entry) {
-      //   // Pull the day number from the entry timestamp.
-      //   let date = new Date(0) // Zero sets the date to the epoch
-      //   date.setUTCSeconds(entry.timestamp.seconds)
-      //   let entryDayNum = date.toLocaleString('en-US', {day: 'numeric'})
-      //   let index = entryDayNum - 1
-      //   days[index].entries = days[index].entries || []
-      //   days[index].entries.push(entry)
-      //   // In case this was an offday, update since there are entries.
-      //   days[index].isWorkday = true
-      // })
-
+      let entries = this.logEntries
+      entries.forEach(function (entry) {
+        // Pull the day number from the entry timestamp.
+        let date = new Date(0) // Zero sets the date to the epoch
+        date.setUTCSeconds(entry.timestamp.seconds)
+        let entryDayNum = date.toLocaleString('en-US', {day: 'numeric'})
+        let index = entryDayNum - 1
+        days[index].entries = days[index].entries || []
+        // todo: smarter way to not duplicate references on every state change?
+        if (!days[index].entries.find(d => d.entryId === entry.id)) {
+          days[index].entries.push({entryId: entry.id})
+        }
+        // Any day with entries is treated as a 'workday'.
+        if (!days[index].isWorkday) {
+          days[index].isWorkday = true
+          // Seek to end of the offday series, and remove from it
+          // the offday that was just converted to a workday.
+          let seeking = true
+          let offset = 1
+          do {
+            if ('offdaySeries' in days[index + offset]) {
+              // todo: This only works on the first item...
+              days[index + offset].offdaySeries.shift()
+              seeking = false
+            }
+            offset++
+          } while (seeking)
+        }
+      })
       return days
     }
   },
@@ -104,6 +121,9 @@ export default {
     },
     newRow () {
       console.log('todo: insert new logEntry at pointer location...')
+    },
+    getEntry (id) {
+      return this.logEntries.find(entry => entry.id === id)
     }
   },
   filters: {

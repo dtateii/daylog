@@ -3,37 +3,14 @@ import TimeHelper from '@/common/timeHelper'
 export default {
   namespaced: true,
   state: {
+    logEntries: [],
     logDays: [],
     month: null,
     year: null
   },
   mutations: {
     setEntries: (state, logEntries) => {
-      logEntries.forEach(function (entry) {
-        // Pull the day number from the entry timestamp.
-        let date = new Date(0) // Zero sets the date to the epoch
-        date.setUTCSeconds(entry.timestamp.seconds)
-        let entryDayNum = date.toLocaleString('en-US', {day: 'numeric'})
-        let index = entryDayNum - 1
-        state.logDays[index].entries = state.logDays[index].entries || []
-        state.logDays[index].entries.push(entry)
-        // Any day with entries is treated as a 'workday'.
-        if (!state.logDays[index].isWorkday) {
-          state.logDays[index].isWorkday = true
-          // Seek to end of the offday series, and remove from it
-          // the offday that was just converted to a workday.
-          let seeking = true
-          let offset = 1
-          do {
-            if ('offdaySeries' in state.logDays[index + offset]) {
-              // todo: This only works on the first item...
-              state.logDays[index + offset].offdaySeries.shift()
-              seeking = false
-            }
-            offset++
-          } while (seeking)
-        }
-      })
+      state.logEntries = logEntries
     },
     setDays: (state, days) => {
       state.logDays = days
