@@ -1,7 +1,7 @@
 /* Boxes and positioning */
 
 /* Round borders */
-@mixin box-border-radii($topleft, $topright, $bottomright, $bottomleft) {
+@mixin box--border-radii($topleft, $topright, $bottomright, $bottomleft) {
   border-top-left-radius: $topleft;
   border-top-right-radius: $topright;
   border-bottom-right-radius: $bottomright;
@@ -17,7 +17,7 @@
 }
 
 // Only do the top and bottom left.
-@mixin box-border-radii-left($topleft, $bottomleft) {
+@mixin box--border-radii-left($topleft, $bottomleft) {
   border-top-left-radius: $topleft;
   border-bottom-left-radius: $bottomleft;
   -webkit-border-top-left-radius: $topleft;
@@ -26,7 +26,7 @@
   -moz-border-radius-bottomleft: $bottomleft;
 }
 // Only do the top and bottom right.
-@mixin box-border-radii-right($topright, $bottomright) {
+@mixin box--border-radii-right($topright, $bottomright) {
   border-top-right-radius: $topright;
   border-bottom-right-radius: $bottomright;
   -webkit-border-top-right-radius: $topright;

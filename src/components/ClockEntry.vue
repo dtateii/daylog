@@ -1,5 +1,5 @@
 <template>
-  <span id="nowEntry">
+  <span id="now-entry">
     <span class="time now">{{timeHuman}}</span>
     <input @keyup.enter="submit"
          v-model="activity"
@@ -40,10 +40,10 @@ export default {
 </script>
 
 <style lang="scss">
-#nowEntry {
+#now-entry {
     display: inline;
 }
 .time.now {
-  color: $color-now;
+  color: $color--now;
 }
 </style>

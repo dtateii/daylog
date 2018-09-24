@@ -11,11 +11,11 @@
         class="workday">
         <header>
           <div class="divider">
-            <span class="monthLabel">{{month.name}}</span>
+            <span class="month-label">{{month.name}}</span>
           </div>
-          <div class="dayDetails">
-            <h3 class="dayNum">{{key + 1}}</h3>
-            <span class="dayName">{{logDay.name}}</span>
+          <div class="day-details">
+            <h3 class="day-num">{{key + 1}}</h3>
+            <span class="day-name">{{logDay.name}}</span>
           </div>
         </header>
         <LogDayEntries :day="logDay.date" />
@@ -98,35 +98,35 @@ export default {
     height: 0.5em;
     opacity: 0.5;
   }
-  .monthLabel {
+  .month-label {
     font-size: 0.7em;
     font-weight: bold;
     text-transform: uppercase;
-    color: $color-algae-green;
+    color: $color--algae-green;
     opacity: 0.8;
   }
-  .dayDetails {
+  .day-details {
     display: flex;
     align-items: center;
-    .dayNum {
+    .day-num {
       display: inline-block;
       margin: 0 0.4em 0 0;
       font-size: 2em;
       font-weight: 300;
     }
-    .dayName {
+    .day-name {
       text-transform: uppercase;
       opacity: 0.8;
-      @include effect-transition (opacity);
+      @include effect--transition (opacity);
     }
   }
   &.today {
-    .monthLabel {
+    .month-label {
       color: #ccc;
     }
-    .dayNum,
-    .dayName {
-      color: $color-now;
+    .day-num,
+    .day-name {
+      color: $color--now;
       opacity: 1;
     }
   }

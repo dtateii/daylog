@@ -73,12 +73,12 @@ export default {
 }
 .row input {
   opacity: 0.8;
-  @include effect-transition (all);
+  @include effect--transition (all);
   width: 80%;
   &:focus {
     outline: none;
     opacity: 1;
-    color: $color-focus;
+    color: $color--focus;
   }
   &:hover {
     opacity: 1;
@@ -90,10 +90,10 @@ export default {
   display: inline-block;
   width: 8%;
   opacity: 0.8;
-  @include effect-transition (opacity);
+  @include effect--transition (opacity);
   &:focus {
     opacity: 1;
-    color: $color-focus;
+    color: $color--focus;
   }
   &:hover {
     opacity: 1;

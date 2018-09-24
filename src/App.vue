@@ -17,9 +17,9 @@ export default {
 
 <style lang="scss">
 html, body {
-  background-color: $color-outer-space;
+  background-color: $color--outer-space;
   color: white;
-  @extend %type-default
+  @extend %type--default
 }
 #app {
   text-align: center;

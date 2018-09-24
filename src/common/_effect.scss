@@ -1,9 +1,17 @@
-// Browser support for transistions
-/* @include transition(all,2s,ease-out); */
-@mixin effect-transition($what: all, $time: 0.25s, $how: ease-in-out) {
+/* Effects and Transistions */
+
+@mixin effect--transition($what: all, $time: 0.25s, $how: ease-in-out) {
   -webkit-transition: $what $time $how;
   -moz-transition:    $what $time $how;
   -ms-transition:     $what $time $how;
   -o-transition:      $what $time $how;
   transition:         $what $time $how;
+}
+
+@mixin effect--transition-multi($what...) {
+  -webkit-transition: $what;
+  -moz-transition:    $what;
+  -ms-transition:     $what;
+  -o-transition:      $what;
+  transition:         $what;
 }
