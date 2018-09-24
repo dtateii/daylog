@@ -89,6 +89,7 @@ export default {
         // Default "workdays" are M-F, "offdays" are Sa-Su, derived
         // from the weekday number.
         days[i] = {
+          date: new Date(context.state.year + '/' + context.state.month + '/' + (i + 1)),
           name: TimeHelper.getWeekdayName(weekdayNum),
           isToday: (context.state.month === TimeHelper.getNow().month.num) && i === (TimeHelper.getNow().day.num - 1),
           isWorkday: (weekdayNum > 0 && weekdayNum < 6)

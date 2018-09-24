@@ -18,28 +18,12 @@
             <span class="dayName">{{logDay.name}}</span>
           </div>
         </header>
-        <section class="entries">
-          <div
-            v-for="entry in logDay.entries"
-            v-bind:key="entry.id"
-            class="row">
-            <span class="time">{{getEntry(entry.entryId).timestamp | timeHuman}}</span>
-            <input
-              class="description"
-              :value="getEntry(entry.entryId).activity"
-              @keyup.enter="insertLog"
-              @change="updateEntry(entry.entryId, $event.target.value)"
-              />
-              <!-- <button
-            class="insertion"
-            @click.prevent="newRow">+</button> -->
-          </div>
-          <div
-            v-if="logDay.isToday"
-            class="row">
-            <ClockEntry />
-          </div>
-        </section>
+        <LogDayEntries :day="logDay.date" />
+        <div
+          v-if="logDay.isToday"
+          class="row">
+          <ClockEntry />
+        </div>
       </div>
       <!-- /Workday Wrapper -->
       <!-- Weekend Wrapper -->
@@ -52,15 +36,19 @@
 <script>
 import ClockEntry from '@/components/ClockEntry.vue'
 import LogOffdays from '@/components/LogOffdays.vue'
+import LogDayEntries from '@/components/LogDayEntries.vue'
 
 export default {
   name: 'LogDaysList',
   components: {
+    LogDayEntries,
     ClockEntry,
     LogOffdays
   },
   created: function () {
     this.$store.dispatch('daylog/loadLogDays')
+    // Auth user and fetch month's entries once here, to make it
+    // available to LogDayEntries component, via vuex store.
     this.$store.dispatch('auth/authenticate').then(response => {
       this.$store.dispatch('daylog/loadLogEntries')
     })
@@ -79,61 +67,7 @@ export default {
     logDays: function () {
       // Calendar the days of the month.
       let days = this.$store.getters['daylog/getLogDays']
-      let entries = this.logEntries
-      entries.forEach(function (entry) {
-        // Pull the day number from the entry timestamp.
-        let date = new Date(0) // Zero sets the date to the epoch
-        date.setUTCSeconds(entry.timestamp.seconds)
-        let entryDayNum = date.toLocaleString('en-US', {day: 'numeric'})
-        let index = entryDayNum - 1
-        days[index].entries = days[index].entries || []
-        // todo: smarter way to not duplicate references on every state change?
-        if (!days[index].entries.find(d => d.entryId === entry.id)) {
-          days[index].entries.push({entryId: entry.id})
-        }
-        // Any day with entries is treated as a 'workday'.
-        if (!days[index].isWorkday) {
-          days[index].isWorkday = true
-          // Seek to end of the offday series, and remove from it
-          // the offday that was just converted to a workday.
-          let seeking = true
-          let offset = 1
-          do {
-            if ('offdaySeries' in days[index + offset]) {
-              // todo: This only works on the first item...
-              days[index + offset].offdaySeries.shift()
-              seeking = false
-            }
-            offset++
-          } while (seeking)
-        }
-      })
       return days
-    }
-  },
-  methods: {
-    updateEntry (entryId, entryText) {
-      this.$store.dispatch('daylog/updateLogEntry', {id: entryId, activity: entryText})
-    },
-    insertLog () {
-      // Insert a new entry field and focus to it.
-      console.log('todo: insert new logEntry below current...')
-    },
-    newRow () {
-      console.log('todo: insert new logEntry at pointer location...')
-    },
-    getEntry (id) {
-      return this.logEntries.find(entry => entry.id === id)
-    }
-  },
-  filters: {
-    timeHuman: function (timestamp) {
-      let date = timestamp.toDate()
-      let timeDisplay = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-      // Remove am/pm: todo: Note this will probably screw up other locales...
-      timeDisplay = timeDisplay.slice(0, -3)
-
-      return timeDisplay
     }
   }
 }
@@ -190,33 +124,6 @@ export default {
     .dayName {
       color: $color-now;
     }
-  }
-  .entries {
-    margin-bottom: 2em;
-  }
-}
-
-.row input {
-  &:focus {
-    outline: none;
-  }
-  &:hover {
-    background: none;
-  };
-}
-
-.time {
-    text-align: right;
-    display: inline-block;
-    margin-right: 0.1em;
-}
-.insertion {
-  width: 100%;
-  height: 2px;
-  padding: 0;
-  opacity: 0;
-  &:hover {
-    opacity: 1;
   }
 }
 .offday {
