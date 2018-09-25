@@ -92,11 +92,11 @@ export default {
   }
   .divider:after {
     content: "";
-    border-bottom: 1px solid;
+    border-bottom: 1px solid $color--algae-green;
     margin-left: 0.5em;
     width: 100%;
     height: 0.5em;
-    opacity: 0.5;
+    opacity: 0.4;
   }
   .month-label {
     font-size: 0.7em;
@@ -128,6 +128,9 @@ export default {
     .day-name {
       color: $color--now;
       opacity: 1;
+    }
+    .divider:after {
+      border-bottom: 1px solid #ccc;
     }
   }
 }

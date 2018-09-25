@@ -34,16 +34,30 @@ export default {
       context.rootState.db.doc(`users/${user.uid}/daylog/${logEntry.id}`)
         .update({activity: logEntry.activity})
     },
+    deleteLogEntry: (context, entryId) => {
+      let user = context.rootState.auth.user
+      if (!user.uid) {
+        return
+      }
+      context.rootState.db.doc(`users/${user.uid}/daylog/${entryId}`).delete().then(function () {
+        console.log('Document ' + entryId + ' successfully deleted')
+      }).catch(function (error) {
+        console.error('Error removing document: ', error)
+      })
+    },
     insertLogEntry: (context, logEntry) => {
       let user = context.rootState.auth.user
       if (!user.uid) {
         return
       }
       // Firebase automatically converts JS Date obj to Firbase Timestamp obj. Thanks!
-      context.rootState.db.collection('users').doc(user.uid).collection('daylog')
-        .add(logEntry).then(function () {
-          console.log('Entry `' + logEntry.activity + '` successfully stored.')
-        })
+      return new Promise((resolve, reject) => {
+        context.rootState.db.collection('users').doc(user.uid).collection('daylog')
+          .add(logEntry).then(function () {
+            console.log('Entry `' + logEntry.activity + '` successfully stored.')
+            resolve()
+          })
+      })
     },
     loadLogEntries: (context) => {
       // todo: Filter query for desired entries set (month)
@@ -60,7 +74,6 @@ export default {
             data.id = doc.id
             logEntries.push(data)
           })
-          logEntries.sort()
           context.commit('setEntries', logEntries)
         })
     },

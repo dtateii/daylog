@@ -1,14 +1,15 @@
 <template>
   <section class="entries">
     <div
-    v-for="entry in dayEntries"
-    v-bind:key="entry.id"
+    v-for="(entry, index) in dayEntries"
+    v-bind:key="index"
     class="row">
       <span class="time">{{entry.timestamp | timeHuman}}</span>
       <input
         class="description"
         :value="entry.activity"
-        @keyup.enter="insertLog"
+        @keyup.enter="insertEntry(index, $event.target)"
+        @keyup.46="deleteEntry(entry.id)"
         @change="updateEntry(entry.id, $event.target.value)"
         />
         <!-- <button
@@ -35,9 +36,47 @@ export default {
     updateEntry (entryId, entryText) {
       this.$store.dispatch('daylog/updateLogEntry', {id: entryId, activity: entryText})
     },
-    insertLog () {
-      // Insert a new entry field and focus to it.
-      console.log('todo: insert new logEntry below current...')
+    deleteEntry (entryId) {
+      this.$store.dispatch('daylog/deleteLogEntry', entryId)
+    },
+    insertEntry (index, target) {
+      // todo: Actually, if the subsequent record has a blank activity
+      // value, then don't create a new record, just focus the next
+      // item.
+      if ((index + 1) in this.dayEntries) {
+        if (this.dayEntries[index + 1].activity === '') {
+          target.parentNode.nextSibling.lastChild.focus()
+          return
+        }
+      }
+      // Insert a new entry and focus to it.
+      // Use index to find current and next timestamps, then split them
+      // for a reasonable guess at an initial new item timestamp.
+      let timePrev = this.dayEntries[index].timestamp.seconds
+      // Default the timeNext to 1 hour, in case there isn't a next time
+      // entry to use. The difference will be 1/2, so this will work out
+      // to defaulting to 30 minutes after the previous entry.
+      let timeNext = timePrev + (60 * 60)
+      // Check that a next item exists
+      if ((index + 1) in this.dayEntries) {
+        timeNext = this.dayEntries[index + 1].timestamp.seconds
+      }
+      let midway = Math.floor((timeNext - timePrev) / 2)
+      // Don't jump crazy distances. If new is more than 1 hr, reduce.
+      if (midway > 3600) {
+        midway = 3600
+      }
+      let newSeconds = timePrev + midway
+      // todo: fix daylight savings time issue.
+      newSeconds = newSeconds + 3600
+      // Firestore will take a js Date obj.
+      let newDate = new Date(0)
+      newDate.setSeconds(newSeconds)
+      let newEntry = {activity: '', timestamp: newDate}
+      // Insert entry into store, vuex and firebase will do the rest.
+      this.$store.dispatch('daylog/insertLogEntry', newEntry).then(response => {
+        target.parentNode.nextSibling.lastChild.focus()
+      })
     },
     newRow () {
       console.log('todo: insert new logEntry at pointer location...')
