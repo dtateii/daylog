@@ -6,7 +6,7 @@
   padding: 1em 0.5em;
   text-align: center;
   border: none;
-  background: rgba($color--bali-hai, 0.5);
+  background: rgba(desaturate($color--bali-hai, 5%), 0.5);
   color: lighten($color--bali-hai, 10%);
   text-transform: uppercase;
   @include effect--transition-multi ( color 0.2s ease, background-color 0.2s ease);

@@ -1,20 +1,38 @@
 <template>
   <section class="entries">
     <div
-    v-for="(entry, index) in dayEntries"
-    v-bind:key="index"
-    class="row">
-      <span class="time">{{entry.timestamp | timeHuman}}</span>
-      <input
-        class="description"
-        :value="entry.activity"
-        @keyup.enter="insertEntry(index, $event.target)"
-        @keyup.46="deleteEntry(entry.id)"
-        @change="updateEntry(entry.id, $event.target.value)"
-        />
-        <!-- <button
-      class="insertion"
-      @click.prevent="newRow">+</button> -->
+      v-for="(entry, index) in dayEntries"
+      v-bind:key="index"
+      class="row">
+      <div class="entry">
+        <input
+          class="time"
+          @keydown.up.prevent="timeUp(index)"
+          @keydown.down.prevent="timeDown(index)"
+          :value="entry.timestamp | timeHuman" />
+        <input
+          class="description"
+          :value="entry.activity"
+          @keyup.enter="insertEntry(index, $event.target)"
+          @keyup.delete="deleteEmpty(entry.id, $event.target.value)"
+          @keyup.46="deleteEntry(entry.id)"
+          @change="updateEntry(entry.id, $event.target.value)" />
+      </div>
+      <!-- <div
+        class="insertion"
+        @click.prevent="newRow">+</div> -->
+    </div>
+    <div
+      v-if="dayEntries.length === 0"
+      class="row">
+      <div class="entry empty">
+        <input
+          class="description"
+          value=""
+          placeholder="+ Add Entry"
+          @keyup.enter="insertEntry(0, $event.target)"
+          @change="updateEntry(0, $event.target.value)" />
+      </div>
     </div>
   </section>
 </template>
@@ -34,10 +52,25 @@ export default {
   },
   methods: {
     updateEntry (entryId, entryText) {
+      console.log('change fired')
       this.$store.dispatch('daylog/updateLogEntry', {id: entryId, activity: entryText})
     },
     deleteEntry (entryId) {
+      // "Real" delete key removes record no matter what.
       this.$store.dispatch('daylog/deleteLogEntry', entryId)
+    },
+    deleteEmpty (entryId, entryText) {
+      // "Real" delete key or Macbook delete key or backspace delete key
+      // removes record only if the input is empty.
+      if (entryText === '') {
+        this.$store.dispatch('daylog/deleteLogEntry', entryId)
+      }
+    },
+    timeUp (index) {
+      this.dayEntries[index].timestamp.seconds += 360
+    },
+    timeDown (index) {
+      this.dayEntries[index].timestamp.seconds -= 360
     },
     insertEntry (index, target) {
       // todo: Actually, if the subsequent record has a blank activity
@@ -73,9 +106,11 @@ export default {
       let newDate = new Date(0)
       newDate.setSeconds(newSeconds)
       let newEntry = {activity: '', timestamp: newDate}
-      // Insert entry into store, vuex and firebase will do the rest.
+      // Insert entry into store. Once it is inserted, focus to it.
       this.$store.dispatch('daylog/insertLogEntry', newEntry).then(response => {
-        target.parentNode.nextSibling.lastChild.focus()
+        // From me, go up two levels to 'row', go to next row,
+        // proceed to entry wrapper, then description input.
+        target.parentNode.parentNode.nextSibling.firstChild.lastChild.focus()
       })
     },
     newRow () {
@@ -101,6 +136,9 @@ export default {
       timeDisplay = timeDisplay.slice(0, -3)
       return timeDisplay
     }
+  },
+  destroyed () {
+    // todo: necessary to remove keyup event listeners?
   }
 }
 </script>
@@ -110,41 +148,48 @@ export default {
   margin-bottom: 2em;
   font-weight: 300;
 }
-.row input {
-  opacity: 0.8;
-  @include effect--transition (all);
-  width: 80%;
-  &:focus {
-    outline: none;
-    opacity: 1;
-    color: $color--focus;
+.entry {
+  display: flex;
+  input {
+    opacity: 0.8;
+    padding: 0.5em;
+    @include effect--transition (all);
+    &.time {
+      width: 8%;
+      text-align: right;
+    }
+    &.description {
+      flex: 1;
+    }
+    &:focus {
+      outline: none;
+      opacity: 1;
+      color: $color--focus;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+    }
+    &:hover {
+      opacity: 1;
+    }
+    &::selection { background: $color--algae-green; color: white; }
   }
-  &:hover {
-    opacity: 1;
-  };
-}
-
-.time {
-  text-align: right;
-  display: inline-block;
-  width: 8%;
-  opacity: 0.8;
-  @include effect--transition (opacity);
-  &:focus {
-    opacity: 1;
-    color: $color--focus;
-  }
-  &:hover {
-    opacity: 1;
+  &.empty {
+    opacity: 0;
+    @include effect--transition (opacity);
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 .insertion {
+  cursor: pointer;
   width: 100%;
-  height: 2px;
+  height: 1em;
   padding: 0;
-  opacity: 0;
+  opacity: 0.5;
+  @include effect--transition (all);
   &:hover {
     opacity: 1;
+    height: 2em;
   }
 }
 </style>

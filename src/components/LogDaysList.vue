@@ -22,7 +22,7 @@
         <div
           v-if="logDay.isToday"
           class="row">
-          <ClockEntry />
+          <LogClockEntry />
         </div>
       </div>
       <!-- /Workday Wrapper -->
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import ClockEntry from '@/components/ClockEntry.vue'
+import LogClockEntry from '@/components/LogClockEntry.vue'
 import LogOffdays from '@/components/LogOffdays.vue'
 import LogDayEntries from '@/components/LogDayEntries.vue'
 
@@ -42,7 +42,7 @@ export default {
   name: 'LogDaysList',
   components: {
     LogDayEntries,
-    ClockEntry,
+    LogClockEntry,
     LogOffdays
   },
   created: function () {

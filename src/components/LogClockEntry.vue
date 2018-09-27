@@ -1,16 +1,17 @@
 <template>
   <span id="now-entry">
-    <span class="time now">{{timeHuman}}</span>
-    <input @keyup.enter="submit"
-         v-model="activity"
-         placeholder="Activity..."
+    <span class="time">{{timeHuman}}</span>
+    <input @keyup.enter="submit()"
+      v-model="activity"
+      placeholder="Activity..."
+      class="activity"
     />
   </span>
 </template>
 
 <script>
 export default {
-  name: 'ClockEntry',
+  name: 'LogClockEntry',
   data () {
     return {
       date: '',
@@ -21,9 +22,6 @@ export default {
   created () {
     setInterval(this.updateTime, 1000)
     this.updateTime()
-    return {
-      logEntries: this.$store.getters.getLogEntries
-    }
   },
   methods: {
     updateTime () {
@@ -34,6 +32,8 @@ export default {
       // Pass Date to Firestore. It will convert JS Date to Firebase Timestamp.
       let logEntry = {timestamp: this.date, activity: this.activity}
       this.$store.dispatch('daylog/insertLogEntry', logEntry)
+      // Clear the input field
+      this.activity = ''
     }
   }
 }
@@ -41,9 +41,16 @@ export default {
 
 <style lang="scss">
 #now-entry {
-    display: inline;
-}
-.time.now {
-  color: $color--now;
+  display: flex;
+  .time {
+    color: $color--now;
+    width: 6em;
+    margin-right: 1em;
+  }
+  .activity {
+    padding: 0;
+    flex: 1;
+    outline: none;
+  }
 }
 </style>
