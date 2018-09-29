@@ -4,23 +4,24 @@
       v-for="(entry, index) in dayEntries"
       v-bind:key="index"
       class="row">
-      <div class="entry">
+      <div
+        class="entry">
         <input
-          class="time"
+          :value="entry.timestamp | timeHuman"
           @keydown.up.prevent="timeUp(index)"
           @keydown.down.prevent="timeDown(index)"
-          :value="entry.timestamp | timeHuman" />
+          class="time" />
         <input
-          class="description"
-          :value="entry.activity"
-          @keyup.enter="insertEntry(index, $event.target)"
-          @keyup.delete="deleteEmpty(entry.id, $event.target.value)"
-          @keyup.46="deleteEntry(entry.id)"
-          @change="updateEntry(entry.id, $event.target.value)" />
+          v-model="entry.activity"
+          ref="activities"
+          @keyup.enter="updateEntry(index, true)"
+          @change="updateEntry(entry)"
+          @keydown.up.prevent="goUp(index)"
+          @keydown.down.prevent="goDown(index)"
+          @blur="cleanUp(index)"
+          placeholder="Activity..."
+          class="description" />
       </div>
-      <!-- <div
-        class="insertion"
-        @click.prevent="newRow">+</div> -->
     </div>
     <div
       v-if="dayEntries.length === 0"
@@ -51,35 +52,73 @@ export default {
     }
   },
   methods: {
-    updateEntry (entryId, entryText) {
-      console.log('change fired')
-      this.$store.dispatch('daylog/updateLogEntry', {id: entryId, activity: entryText})
+    updateEntry (index, returnPressed = false) {
+      let entry = this.dayEntries[index]
+      // If return key was pressed, user might intend to:
+      // 1: Split the current line to two lines.
+      // 2: Explicitly save the current input value.
+      if (returnPressed) {
+        // Split the entry value at the caret.
+        let cpos = this.$refs.activities[index].selectionStart
+        let text = this.dayEntries[index].activity
+        let textLeft = text.substr(0, cpos).trim()
+        let textRight = text.substr(cpos).trim()
+        // Update the current entry
+        entry.activity = textLeft
+        // If there is anything to the right, a new entry should
+        // be inserted.
+        if (textRight) {
+          this.insertEntry(index, textRight)
+        }
+      }
+      // Update the current entry
+      // todo skip this if nothing changed?
+      this.$store.dispatch('daylog/updateLogEntry', entry)
     },
     deleteEntry (entryId) {
-      // "Real" delete key removes record no matter what.
       this.$store.dispatch('daylog/deleteLogEntry', entryId)
     },
-    deleteEmpty (entryId, entryText) {
-      // "Real" delete key or Macbook delete key or backspace delete key
-      // removes record only if the input is empty.
-      if (entryText === '') {
-        this.$store.dispatch('daylog/deleteLogEntry', entryId)
+    cleanUp (index) {
+      // If the input is empty, remove the record.
+      if (index in this.dayEntries) {
+        if (this.dayEntries[index].activity === '') {
+          this.deleteEntry(this.dayEntries[index].id)
+        }
+      }
+    },
+    goUp (index) {
+      // Go up an entry, if possible.
+      if (index > 0) {
+        let caretPosition = this.$refs.activities[index].selectionStart
+        this.$refs.activities[index - 1].focus()
+        this.$refs.activities[index - 1].setSelectionRange(caretPosition, caretPosition)
+      } else {
+        // todo: maybe jump up to previous day?
+      }
+    },
+    goDown (index) {
+      // Go down an entry, if possible.
+      if (index < (this.$refs.activities.length - 1)) {
+        let caretPosition = this.$refs.activities[index].selectionStart
+        this.$refs.activities[index + 1].focus()
+        this.$refs.activities[index + 1].setSelectionRange(caretPosition, caretPosition)
+      } else {
+        // todo: maybe break down to next day?
       }
     },
     timeUp (index) {
       this.dayEntries[index].timestamp.seconds += 360
+      this.dayEntries.filter(this.dayFilter(this.day))
     },
     timeDown (index) {
       this.dayEntries[index].timestamp.seconds -= 360
     },
-    insertEntry (index, target) {
-      // todo: Actually, if the subsequent record has a blank activity
-      // value, then don't create a new record, just focus the next
-      // item.
+    insertEntry (index, text = '') {
+      // If the subsequent record has a blank activity value, then
+      // do not insert a new entry, simply focus to the next one.
       if ((index + 1) in this.dayEntries) {
         if (this.dayEntries[index + 1].activity === '') {
-          target.parentNode.nextSibling.lastChild.focus()
-          return
+          this.$refs.activities[index + 1].focus()
         }
       }
       // Insert a new entry and focus to it.
@@ -105,16 +144,13 @@ export default {
       // Firestore will take a js Date obj.
       let newDate = new Date(0)
       newDate.setSeconds(newSeconds)
-      let newEntry = {activity: '', timestamp: newDate}
+      let newEntry = {activity: text, timestamp: newDate}
       // Insert entry into store. Once it is inserted, focus to it.
       this.$store.dispatch('daylog/insertLogEntry', newEntry).then(response => {
-        // From me, go up two levels to 'row', go to next row,
-        // proceed to entry wrapper, then description input.
-        target.parentNode.parentNode.nextSibling.firstChild.lastChild.focus()
+        // Try to focus to the new input.
+        this.$refs.activities[index + 1].focus()
+        this.$refs.activities[index + 1].setSelectionRange(0, 0)
       })
-    },
-    newRow () {
-      console.log('todo: insert new logEntry at pointer location...')
     },
     dayFilter (day) {
       // Offset the date "start" epoch seconds so that a day's work can
@@ -154,13 +190,6 @@ export default {
     opacity: 0.8;
     padding: 0.5em;
     @include effect--transition (all);
-    &.time {
-      width: 8%;
-      text-align: right;
-    }
-    &.description {
-      flex: 1;
-    }
     &:focus {
       outline: none;
       opacity: 1;
@@ -171,10 +200,18 @@ export default {
       opacity: 1;
     }
     &::selection { background: $color--algae-green; color: white; }
+    &.time {
+      width: 8%;
+      text-align: right;
+    }
+    &.description {
+      flex: 1;
+    }
   }
   &.empty {
     opacity: 0;
     @include effect--transition (opacity);
+    &:focus-within,
     &:hover {
       opacity: 1;
     }
