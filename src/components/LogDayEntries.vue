@@ -14,11 +14,11 @@
         <input
           v-model="entry.activity"
           ref="activities"
-          @keyup.enter="updateEntry(index, true)"
-          @change="updateEntry(entry)"
+          @change="updateEntry(index)"
+          @blur="cleanUp(index)"
+          @keydown.enter.prevent="splitOrNext(index)"
           @keydown.up.prevent="goUp(index)"
           @keydown.down.prevent="goDown(index)"
-          @blur="cleanUp(index)"
           placeholder="Activity..."
           class="description" />
       </div>
@@ -28,11 +28,10 @@
       class="row">
       <div class="entry empty">
         <input
-          class="description"
-          value=""
+          @keyup.enter="insertEntry(0, $event.target.value)"
+          @change="insertEntry(0, $event.target.value)"
           placeholder="+ Add Entry"
-          @keyup.enter="insertEntry(0, $event.target)"
-          @change="updateEntry(0, $event.target.value)" />
+          class="first-entry" />
       </div>
     </div>
   </section>
@@ -52,39 +51,57 @@ export default {
     }
   },
   methods: {
-    updateEntry (index, returnPressed = false) {
-      let entry = this.dayEntries[index]
-      // If return key was pressed, user might intend to:
-      // 1: Split the current line to two lines.
-      // 2: Explicitly save the current input value.
-      if (returnPressed) {
-        // Split the entry value at the caret.
-        let cpos = this.$refs.activities[index].selectionStart
-        let text = this.dayEntries[index].activity
-        let textLeft = text.substr(0, cpos).trim()
-        let textRight = text.substr(cpos).trim()
-        // Update the current entry
-        entry.activity = textLeft
-        // If there is anything to the right, a new entry should
-        // be inserted.
-        if (textRight) {
-          this.insertEntry(index, textRight)
-        }
+    splitOrNext (index) {
+      // This moves the cursor position and breaks lines
+      // if necessary. Note, do not update the entry --
+      // the change event will also fire since the focus
+      // changes, which would call it twice.
+      // Split the entry value at the caret.
+      let cpos = this.$refs.activities[index].selectionStart
+      let text = this.dayEntries[index].activity
+      let textLeft = text.substr(0, cpos).trim()
+      let textRight = text.substr(cpos).trim()
+      // Update the current entry value.
+      this.dayEntries[index].activity = textLeft
+      // Update needs to be called because the element change
+      // function isn't triggered by the Vue component value
+      // changing.
+      this.updateEntry(index)
+      // A new entry should be inserted. It may be empty or not.
+      this.insertEntry(index, textRight)
+    },
+    cleanUp (index) {
+      // This fires on blur. Empty records must be deleted.
+      if (!(index in this.dayEntries)) {
+        console.log('Entry at index ' + index + ' does not exist to clean up.')
+        return
       }
-      // Update the current entry
-      // todo skip this if nothing changed?
+      let entry = this.dayEntries[index]
+      // If the input is empty, delete the record.
+      if (entry.activity === '') {
+        this.deleteEntry(entry.id)
+        // todo: put the cursor someplace useful.
+      }
+    },
+    updateEntry (index) {
+      // This is called on change. This always fires simultaneously
+      // with on blur cleanUp method.
+      if (!(index in this.dayEntries)) {
+        console.log('Entry at index ' + index + 'doesnt exist to update.')
+        return
+      }
+      let entry = this.dayEntries[index]
+      // If the input is empty do nothing. This is important because
+      // blur cleanUp is handling removing the record, so dont
+      // try to delete again or update a deleted record.
+      if (entry.activity === '') {
+        return
+      }
+      // Update the changed value in the store.
       this.$store.dispatch('daylog/updateLogEntry', entry)
     },
     deleteEntry (entryId) {
       this.$store.dispatch('daylog/deleteLogEntry', entryId)
-    },
-    cleanUp (index) {
-      // If the input is empty, remove the record.
-      if (index in this.dayEntries) {
-        if (this.dayEntries[index].activity === '') {
-          this.deleteEntry(this.dayEntries[index].id)
-        }
-      }
     },
     goUp (index) {
       // Go up an entry, if possible.
@@ -124,32 +141,42 @@ export default {
       // Insert a new entry and focus to it.
       // Use index to find current and next timestamps, then split them
       // for a reasonable guess at an initial new item timestamp.
-      let timePrev = this.dayEntries[index].timestamp.seconds
-      // Default the timeNext to 1 hour, in case there isn't a next time
-      // entry to use. The difference will be 1/2, so this will work out
-      // to defaulting to 30 minutes after the previous entry.
-      let timeNext = timePrev + (60 * 60)
-      // Check that a next item exists
-      if ((index + 1) in this.dayEntries) {
-        timeNext = this.dayEntries[index + 1].timestamp.seconds
-      }
-      let midway = Math.floor((timeNext - timePrev) / 2)
-      // Don't jump crazy distances. If new is more than 1 hr, reduce.
-      if (midway > 3600) {
-        midway = 3600
-      }
-      let newSeconds = timePrev + midway
-      // todo: fix daylight savings time issue.
-      newSeconds = newSeconds + 3600
-      // Firestore will take a js Date obj.
       let newDate = new Date(0)
-      newDate.setSeconds(newSeconds)
+      let secondsInit = 0
+      if (index in this.dayEntries) {
+        let timePrev = this.dayEntries[index].timestamp.seconds
+        // Default the timeNext to 1 hour, in case there isn't a next time
+        // entry to use. The difference will be 1/2, so this will work out
+        // to defaulting to 30 minutes after the previous entry.
+        let timeNext = timePrev + (60 * 60)
+        // Check that a next item exists
+        if ((index + 1) in this.dayEntries) {
+          timeNext = this.dayEntries[index + 1].timestamp.seconds
+        }
+        let midway = Math.floor((timeNext - timePrev) / 2)
+        // Don't jump crazy distances. If new is more than 1 hr, reduce.
+        if (midway > 3600) {
+          midway = 3600
+        }
+        // The new seconds calculation is the last time plus the midway point
+        // between that and the next entry.
+        secondsInit = timePrev + midway
+      } else {
+        // This may be the first record for the day. Default to morning.
+        let defaultSeconds = 3600 * 8
+        secondsInit = Math.floor(this.day.getTime() / 1000) + defaultSeconds
+      }
+      // Forward the seconds to the desired date and time.
+      // todo: fix daylight savings time issue, see .getTimezoneOffset()
+      secondsInit += 3600
+      newDate.setSeconds(secondsInit)
+      // Firestore will take a js Date obj.
       let newEntry = {activity: text, timestamp: newDate}
       // Insert entry into store. Once it is inserted, focus to it.
       this.$store.dispatch('daylog/insertLogEntry', newEntry).then(response => {
         // Try to focus to the new input.
-        this.$refs.activities[index + 1].focus()
-        this.$refs.activities[index + 1].setSelectionRange(0, 0)
+        // this.$refs.activities[index + 1].focus()
+        // this.$refs.activities[index + 1].setSelectionRange(0, 0)
       })
     },
     dayFilter (day) {
