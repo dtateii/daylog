@@ -53,9 +53,7 @@ export default {
   methods: {
     splitOrNext (index) {
       // This moves the cursor position and breaks lines
-      // if necessary. Note, do not update the entry --
-      // the change event will also fire since the focus
-      // changes, which would call it twice.
+      // if necessary.
       // Split the entry value at the caret.
       let cpos = this.$refs.activities[index].selectionStart
       let text = this.dayEntries[index].activity
@@ -63,9 +61,11 @@ export default {
       let textRight = text.substr(cpos).trim()
       // Update the current entry value.
       this.dayEntries[index].activity = textLeft
-      // Update needs to be called because the element change
-      // function isn't triggered by the Vue component value
-      // changing.
+      // Update needs to be called directly here on this item.
+      // Even tho the next action is to change the focus to a new
+      // item leaving the current item changed, the on-change event
+      // does not fire in this case, thus the update doesn't store
+      // at all unless stored here.
       this.updateEntry(index)
       // A new entry should be inserted. It may be empty or not.
       this.insertEntry(index, textRight)
@@ -174,9 +174,14 @@ export default {
       let newEntry = {activity: text, timestamp: newDate}
       // Insert entry into store. Once it is inserted, focus to it.
       this.$store.dispatch('daylog/insertLogEntry', newEntry).then(response => {
-        // Try to focus to the new input.
-        // this.$refs.activities[index + 1].focus()
-        // this.$refs.activities[index + 1].setSelectionRange(0, 0)
+        // Try to focus to the new input. For the first record of the day, there
+        // is nothing next to focus to, so call self to create that.
+        if (this.$refs.activities.length === 1) {
+          this.insertEntry(index, '')
+        } else {
+          this.$refs.activities[index + 1].focus()
+          this.$refs.activities[index + 1].setSelectionRange(0, 0)
+        }
       })
     },
     dayFilter (day) {
