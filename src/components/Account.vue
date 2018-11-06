@@ -26,9 +26,10 @@ export default {
   methods: {
     signout () {
       this.$store.dispatch('auth/signout')
+      this.$router.push('authScreen')
     },
     signin () {
-      console.log('sign-in clicked...')
+      this.$router.push('authScreen')
     }
   }
 }

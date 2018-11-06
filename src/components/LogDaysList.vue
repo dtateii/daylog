@@ -47,11 +47,9 @@ export default {
   },
   created: function () {
     this.$store.dispatch('daylog/loadLogDays')
-    // Auth user and fetch month's entries once here, to make it
-    // available to LogDayEntries component, via vuex store.
-    this.$store.dispatch('auth/authenticate').then(response => {
-      this.$store.dispatch('daylog/loadLogEntries')
-    })
+    // Fetch month's entries once here, to make it available to
+    // LogDayEntries component, via vuex store.
+    this.$store.dispatch('daylog/loadLogEntries')
   },
   computed: {
     month: function () {
