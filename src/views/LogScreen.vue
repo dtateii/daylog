@@ -15,10 +15,17 @@ export default {
     Account,
     LogDaysList
   },
+  beforeRouteUpdate (to, from, next) {
+    let set = {
+      year: to.params.year,
+      month: to.params.month
+    }
+    this.load(set)
+    next()
+  },
   created () {
-    // Store the year and month values for the currently
-    // loaded log screen.
-    // If route params are absent, load current month.
+    // On load, either use the route params or default to current
+    // period if there aren't any route params passed in.
     let set = {}
     if (this.$route.params.year && this.$route.params.month) {
       set = {
@@ -31,7 +38,17 @@ export default {
         month: TimeHelper.getNow().month.num
       }
     }
-    this.$store.dispatch('daylog/selectLog', set)
+    this.load(set)
+  },
+  methods: {
+    load (set) {
+      // Set in store the year/month log set on screen
+      this.$store.dispatch('daylog/selectLog', set)
+      // Get the days of the month corresponding to this log set.
+      this.$store.dispatch('daylog/loadLogDays')
+      // Retrieve from firestore the entries for the log on screen.
+      this.$store.dispatch('daylog/loadLogEntries')
+    }
   }
 }
 </script>

@@ -45,12 +45,6 @@ export default {
     LogClockEntry,
     LogOffdays
   },
-  created: function () {
-    this.$store.dispatch('daylog/loadLogDays')
-    // Fetch month's entries once here, to make it available to
-    // LogDayEntries component, via vuex store.
-    this.$store.dispatch('daylog/loadLogEntries')
-  },
   computed: {
     month: function () {
       let date = new Date(this.$store.state.daylog.year + ':' + this.$store.state.daylog.month)

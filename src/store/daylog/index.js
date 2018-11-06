@@ -16,8 +16,8 @@ export default {
       state.logDays = days
     },
     selectLog: (state, set) => {
-      state.year = set.year
-      state.month = set.month
+      state.year = parseInt(set.year)
+      state.month = parseInt(set.month)
     }
   },
   actions: {
@@ -60,11 +60,11 @@ export default {
       })
     },
     loadLogEntries: (context) => {
-      // todo: Filter query for desired entries set (month)
       let user = context.rootState.auth.user
       if (!user.uid) {
         return
       }
+      // todo: this returns everything. Need to filter down to just the set wanted.
       context.rootState.db.collection(`users/${user.uid}/daylog`).orderBy('timestamp')
         .onSnapshot(function (querySnapshot) {
           let logEntries = []

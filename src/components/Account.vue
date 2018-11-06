@@ -17,7 +17,12 @@ export default {
   name: 'account',
   computed: {
     user: function () {
-      return this.$store.getters['auth/getUser']
+      let user = this.$store.getters['auth/getUser']
+      // Sometimes the user isn't there... but why.
+      if (!user) {
+        user = {displayName: '---'}
+      }
+      return user
     },
     photoBg: function () {
       return 'background-image: url(' + this.user.photoURL + ');'
