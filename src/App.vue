@@ -1,9 +1,5 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link>
-      <router-link to="/log/">Log</router-link>
-    </div>
     <router-view/>
   </div>
 </template>
@@ -18,23 +14,11 @@ export default {
 html, body {
   background-color: $color--outer-space;
   color: white;
-  @extend %type--default
+  @extend %type--default;
+  margin: 0;
 }
 #app {
   text-align: center;
-}
-#nav {
-  margin: 0;
-  text-align: left;
-  padding: 1em;
-  a {
-    font-weight: bold;
-    color: #94b3d1;
-    margin: 0 0.3em;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
 }
 input, textarea {
   font-size: 1em;
@@ -42,5 +26,11 @@ input, textarea {
   color: inherit;
   border: none;
   padding: 0.4em 1em;
+}
+body::-webkit-scrollbar {
+    width: 0.5em;
+}
+body::-webkit-scrollbar-thumb {
+  background-color: lighten($color--bg, 20%)
 }
 </style>

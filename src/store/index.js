@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import daylog from './daylog/'
 import auth from './auth/'
+import panel from './panel/'
+import daylog from './daylog/'
 import firebase from 'firebase'
 import 'firebase/firestore'
 
@@ -23,7 +24,8 @@ export default new Vuex.Store({
     db: firebase.firestore()
   },
   modules: {
-    daylog,
-    auth
+    auth,
+    panel,
+    daylog
   }
 })

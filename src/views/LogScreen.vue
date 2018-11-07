@@ -1,18 +1,20 @@
 <template>
   <div class="logScreen">
-    <Account />
-    <LogDaysList />
+    <Panel />
+    <section id="content">
+      <LogDaysList />
+    </section>
   </div>
 </template>
 
 <script>
-import Account from '@/components/Account.vue'
+import Panel from '@/components/Panel.vue'
 import LogDaysList from '@/components/LogDaysList.vue'
 import TimeHelper from '@/common/timeHelper.js'
 
 export default {
   components: {
-    Account,
+    Panel,
     LogDaysList
   },
   beforeRouteUpdate (to, from, next) {
@@ -39,6 +41,10 @@ export default {
       }
     }
     this.load(set)
+    // Get the month name from the number
+    let date = new Date(set.year + ':' + set.month)
+    let monthName = date.toLocaleString('en-US', {month: 'long'})
+    this.$store.commit('panel/setSuperTitle', monthName)
   },
   methods: {
     load (set) {

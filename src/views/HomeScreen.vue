@@ -1,16 +1,16 @@
 <template>
   <div class="homeScreen">
-    <Account />
+    <Panel />
     [home screen]
   </div>
 </template>
 
 <script>
-import Account from '@/components/Account.vue'
+import Panel from '@/components/Panel.vue'
 
 export default {
   components: {
-    Account
+    Panel
   }
 }
 </script>

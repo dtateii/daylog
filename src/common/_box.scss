@@ -34,3 +34,13 @@
   -moz-border-radius-topright: $topright;
   -moz-border-radius-bottomright: $bottomright;
 }
+
+/* Main "toolbar" panel (needs z well above #content) */
+#panel {
+  z-index: 9999;
+}
+/* Main content area (needs z below #panel) */
+#content {
+  z-index: 1;
+  margin-top: 2em;
+}

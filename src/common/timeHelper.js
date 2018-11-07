@@ -13,7 +13,7 @@ export default {
         name = 'Tuis Day'
         break
       case 3:
-        name = 'Odens Day'
+        name = 'Wodens Day'
         break
       case 4:
         name = 'Thors Day'
