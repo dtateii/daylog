@@ -41,10 +41,6 @@ export default {
       }
     }
     this.load(set)
-    // Get the month name from the number
-    let date = new Date(set.year + ':' + set.month)
-    let monthName = date.toLocaleString('en-US', {month: 'long'})
-    this.$store.commit('panel/setSuperTitle', monthName)
   },
   methods: {
     load (set) {
@@ -54,6 +50,11 @@ export default {
       this.$store.dispatch('daylog/loadLogDays')
       // Retrieve from firestore the entries for the log on screen.
       this.$store.dispatch('daylog/loadLogEntries')
+      // Update Panel Title
+      // Get the month name from the number
+      let date = new Date(set.year + ':' + set.month)
+      let monthName = date.toLocaleString('en-US', {month: 'long'})
+      this.$store.commit('panel/setSuperTitle', monthName)
     }
   }
 }

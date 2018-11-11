@@ -7,6 +7,10 @@
         </span>
       </button>
       <h1>{{superTitle}}</h1>
+      <v-select
+        :options="sets"
+        :value="currentSetNumber"
+        @input="changeSet"></v-select>
     </section>
     <section v-show="isExpanded" class="adv">
       <nav id="nav">
@@ -20,10 +24,13 @@
 
 <script>
 import Account from '@/components/Account.vue'
+import VueSelect from 'vue-select'
+import TimeHelper from '@/common/timeHelper'
 
 export default {
   components: {
-    Account
+    Account,
+    'v-select': VueSelect
   },
   data () {
     return {
@@ -36,9 +43,20 @@ export default {
     },
     superTitle () {
       return this.$store.state.panel.superTitle
+    },
+    sets () {
+      return TimeHelper.getMonthsOptions()
+    },
+    currentSetNumber () {
+      return this.$store.state.daylog.month
     }
   },
   methods: {
+    changeSet (opt) {
+      if (opt.value) {
+        this.$router.push('/log/2018/' + opt.value)
+      }
+    },
     panelExpand (e) {
       e.stopPropagation()
       // Toggle hamburger icon appearance.
@@ -163,4 +181,18 @@ $color--hamburger: lighten($color--bg, 40%);
 
 .hamburger--minus.is-active .hamburger-inner::after {
   bottom: 0; }
+
+/* Month/Title dropdown picker */
+.dropdown {
+  width: 50%;
+  height: 2em;
+  outline: none;
+  top: -2em; /* Pull up on top of title */
+  margin: 0 auto -2em auto;
+}
+.v-select.searchable .dropdown-toggle,
+.v-select input {
+  opacity: 0;
+  cursor: pointer;
+}
 </style>
