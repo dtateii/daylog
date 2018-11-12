@@ -64,8 +64,12 @@ export default {
       if (!user.uid) {
         return
       }
-      // todo: this returns everything. Need to filter down to just the set wanted.
-      context.rootState.db.collection(`users/${user.uid}/daylog`).orderBy('timestamp')
+      const rangeStart = new Date(context.state.year + ':' + context.state.month)
+      const rangeEnd = new Date(context.state.year + ':' + (context.state.month + 1))
+      context.rootState.db.collection(`users/${user.uid}/daylog`)
+        .where('timestamp', '>=', rangeStart)
+        .where('timestamp', '<', rangeEnd)
+        .orderBy('timestamp')
         .onSnapshot(function (querySnapshot) {
           let logEntries = []
           querySnapshot.forEach(function (doc) {
