@@ -45,9 +45,7 @@ export default {
   },
   computed: {
     dayEntries: function () {
-      let monthEntries = this.$store.getters['daylog/getLogEntries']
-      // Filter the month's entries to the day in view.
-      return monthEntries.filter(this.dayFilter(this.day))
+      return this.$store.getters['daylog/getDayEntries'](this.day)
     }
   },
   methods: {
@@ -125,7 +123,6 @@ export default {
     },
     timeUp (index) {
       this.dayEntries[index].timestamp.seconds += 360
-      this.dayEntries.filter(this.dayFilter(this.day))
     },
     timeDown (index) {
       this.dayEntries[index].timestamp.seconds -= 360
@@ -183,17 +180,6 @@ export default {
           this.$refs.activities[index + 1].setSelectionRange(0, 0)
         }
       })
-    },
-    dayFilter (day) {
-      // Offset the date "start" epoch seconds so that a day's work can
-      // be considered one day despite bleeding past midnight.
-      // todo: Personalize hours offset config.
-      let offset = 10800 // (3 x 60 x 60)
-      let dayStart = (day.getTime() / 1000) + offset
-      let dayEnd = dayStart + 86400 // (24 x 60 x 60)
-      return function (value) {
-        return value.timestamp.seconds >= dayStart && value.timestamp.seconds < dayEnd
-      }
     }
   },
   filters: {

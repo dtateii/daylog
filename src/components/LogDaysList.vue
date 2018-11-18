@@ -53,9 +53,6 @@ export default {
         num: this.$store.state.daylog.month
       }
     },
-    logEntries: function () {
-      return this.$store.getters['daylog/getLogEntries']
-    },
     logDays: function () {
       // Calendar the days of the month.
       let days = this.$store.getters['daylog/getLogDays']

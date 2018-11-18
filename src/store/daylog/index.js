@@ -153,6 +153,17 @@ export default {
     },
     getLogDays: (state) => {
       return state.logDays
+    },
+    getDayEntries: (state) => {
+      return day => {
+        // Offset the date "start" epoch seconds so that a day's work can
+        // be considered "one day" despite bleeding past midnight.
+        // todo: Personalize hours offset config.
+        let offset = 10800 // (3 x 60 x 60)
+        let dayStart = (day.getTime() / 1000) + offset
+        let dayEnd = dayStart + 86400 // (24 x 60 x 60)
+        return state.logEntries.filter(entry => entry.timestamp.seconds >= dayStart && entry.timestamp.seconds < dayEnd)
+      }
     }
   }
 }

@@ -1,9 +1,9 @@
 <template>
   <div class="logScreen">
     <Panel />
-    <section id="content">
+    <main id="content">
       <LogDaysList />
-    </section>
+    </main>
   </div>
 </template>
 

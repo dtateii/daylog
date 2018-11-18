@@ -17,6 +17,9 @@ export default {
   props: {
     days: Array
   },
+  created () {
+    console.log('created offdays')
+  },
   methods: {
     isLast (key) {
       return key === (this.days.length - 1)
