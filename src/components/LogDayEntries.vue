@@ -8,6 +8,8 @@
         class="entry">
         <input
           :value="entry.timestamp | timeHuman"
+          @blur="updateEntryTime(index)"
+          @keydown.enter.prevent="updateEntryTime(index)"
           @keydown.up.prevent="timeUp(index)"
           @keydown.down.prevent="timeDown(index)"
           class="time" />
@@ -101,6 +103,11 @@ export default {
     deleteEntry (entryId) {
       this.$store.dispatch('daylog/deleteLogEntry', entryId)
     },
+    updateEntryTime (index) {
+      // Triggered by any blur or 'enter' on time input.
+      // todo: Improve efficiency, don't dispatch if no change.
+      this.$store.dispatch('daylog/updateLogEntryTime', this.dayEntries[index])
+    },
     goUp (index) {
       // Go up an entry, if possible.
       if (index > 0) {
@@ -122,10 +129,10 @@ export default {
       }
     },
     timeUp (index) {
-      this.dayEntries[index].timestamp.seconds += 360
+      this.dayEntries[index].timestamp.seconds += 60
     },
     timeDown (index) {
-      this.dayEntries[index].timestamp.seconds -= 360
+      this.dayEntries[index].timestamp.seconds -= 60
     },
     insertEntry (index, text = '') {
       // If the subsequent record has a blank activity value, then

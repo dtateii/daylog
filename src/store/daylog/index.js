@@ -24,6 +24,14 @@ export default {
     selectLog: (context, set) => {
       context.commit('selectLog', set)
     },
+    updateLogEntryTime: (context, logEntry) => {
+      let user = context.rootState.auth.user
+      if (!user.uid) {
+        return
+      }
+      context.rootState.db.doc(`users/${user.uid}/daylog/${logEntry.id}`)
+        .update({timestamp: logEntry.timestamp})
+    },
     updateLogEntry: (context, logEntry) => {
       // Instead of changing state directly, only change Firestore value,
       // as local state is listening (loadlogEntries) and will update anyway.
@@ -50,7 +58,7 @@ export default {
       if (!user.uid) {
         return
       }
-      // Firebase automatically converts JS Date obj to Firbase Timestamp obj. Thanks!
+      // Firebase automatically converts JS Date obj to Firebase Timestamp obj. Thanks!
       return new Promise((resolve, reject) => {
         context.rootState.db.collection('users').doc(user.uid).collection('daylog')
           .add(logEntry).then(function () {
